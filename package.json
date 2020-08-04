@@ -1,0 +1,23 @@
+{
+  "name": "brownzp3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.17.1",
+    "moment": "^2.27.0",
+    "arraylist": "^0.1.0",
+    "companydata": "file:companydata",
+    "mongoose": "^5.9.27",
+    "sync-mysql": "^3.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "Zach Brown",
+  "license": "ISC"
+}
