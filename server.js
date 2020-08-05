@@ -1,16 +1,26 @@
+/*
+    author: Zach Brown
+    professor: Bryan French
+    assignment: Project 3
+    file: server.js
+    function: 
+*/
+
+//require statements - express, moment (for date validation), and business layer
 var express = require("express");
-var moment = require("moment");
-var vali = require("./businessLayer.js")
+var dateVal = require("moment");
+var buisness = require("./businessLayer.js")
 var app = express();
 
 app.use(express.json());
 var urlencodedParser = app.use(express.urlencoded({ extended: false }));
 
+//DataLayer to require companydata/index.js and create RIT user
 var DataLayer = require("./companydata/index.js");
 var dl = new DataLayer("zab5957");
 var response = "";
 
-/* DELETE company */
+//DELETE company
 app.delete('/CompanyServices/company', function(req, res, next) {
     try {
         company = req.query.company;
@@ -27,7 +37,7 @@ app.delete('/CompanyServices/company', function(req, res, next) {
      }  
     res.send(JSON.stringify(response));
 });
-/* GET departments */
+// GET departments 
 app.get('/CompanyServices/departments', function(req, res, next) {
     try{
         company = req.query.company;
@@ -51,13 +61,13 @@ app.get('/CompanyServices/departments', function(req, res, next) {
     } 
     res.send(JSON.stringify(response));
 });
-/* GET department */
+// GET department 
 app.get('/CompanyServices/department', function(req, res, next) {
     try{
         company = req.query.company;
         dept_id = req.query.dept_id;
         dl = new DataLayer(company);
-        if(vali.checkIfDeptidExist(dept_id) == true){
+        if(business.checkIfDeptidExist(dept_id) == true){
             var d = dl.getDepartment(company,dept_id);  
             response = {
                     dept_id:d.getId(),
@@ -75,12 +85,12 @@ app.get('/CompanyServices/department', function(req, res, next) {
     } 
     res.send(JSON.stringify(response));
 });
-/* POST department */
+// POST department 
 app.post('/CompanyServices/department', function(req, res, next) {
     try{
         var company = req.body.company;
         var dept_name = req.body.dept_name;
-        var dept_no = vali.checkIfDeptnoUnique(req.body.dept_no);
+        var dept_no = business.checkIfDeptnoUnique(req.body.dept_no);
         var location = req.body.location;
         dl = new DataLayer(company);
         var d = new dl.Department(company,dept_name,dept_no,location);
@@ -107,17 +117,17 @@ app.post('/CompanyServices/department', function(req, res, next) {
     }  
     res.send(JSON.stringify(response));
 });
-/* PUT department */
+// PUT department 
 app.put('/CompanyServices/department', function(req, res, next) {
     try{
         var company = req.body.company;
         var dept_id = parseInt(req.body.dept_id);
         var company = req.body.company;
         var dept_name = req.body.dept_name;
-        var dept_no = vali.checkIfDeptnoUniquePut(req.body.dept_no,dept_id);
+        var dept_no = business.checkIfDeptnoUniquePut(req.body.dept_no,dept_id);
         var location = req.body.location;
         dl = new DataLayer(company);
-        if(vali.checkIfDeptidExist(dept_id) == true){
+        if(business.checkIfDeptidExist(dept_id) == true){
             var dept = dl.getDepartment(company,dept_id);         
             dept.setDeptName(dept_name);
             dept.setDeptNo(dept_no);
@@ -143,7 +153,7 @@ app.put('/CompanyServices/department', function(req, res, next) {
     }  
     res.send(JSON.stringify(response));
 });
-/* DELETE department */
+// DELETE department 
 app.delete('/CompanyServices/department', function(req, res, next) {
     try {
         company = req.query.company;
@@ -162,7 +172,7 @@ app.delete('/CompanyServices/department', function(req, res, next) {
     res.send(JSON.stringify(response));
 });
 
-/* GET employees */
+// GET employees 
 app.get('/CompanyServices/employees', function(req, res, next) {
     try{
         company = req.query.company;
@@ -189,13 +199,14 @@ app.get('/CompanyServices/employees', function(req, res, next) {
     } 
     res.send(response);
 });
-/* GET employee */
+
+// GET employee
 app.get('/CompanyServices/employee', function(req, res, next) {
      try{
         company = req.query.company;
         emp_id = parseInt(req.query.emp_id);
         dl = new DataLayer(company);
-        if(vali.checkIfEmpidExist(emp_id) == true){
+        if(business.checkIfEmpidExist(emp_id) == true){
             var e = dl.getEmployee(emp_id); 
             response = {
                 emp_id:e.getId(),
@@ -216,28 +227,29 @@ app.get('/CompanyServices/employee', function(req, res, next) {
     } 
     res.send(JSON.stringify(response));
 });
+
 /* POST employee */
 app.post('/CompanyServices/employee', function(req, res, next) {
     try{
         var company = req.body.company;
         var emp_name = req.body.emp_name;
-        var emp_no = vali.checkIfEmpnoUnique(req.body.emp_no);
+        var emp_no = business.checkIfEmpnoUnique(req.body.emp_no);
         var hire_date = req.body.hire_date;
         var job = req.body.job;
         var salary = parseFloat(req.body.salary);
         var dept_id = parseInt(req.body.dept_id);
         var mng_id = parseInt(req.body.mng_id);
-        if(!vali.checkIfEmpidExist(mng_id)){
+        if(!business.checkIfEmpidExist(mng_id)){
             mng_id = 0;
         }
-        //check if the hire_date valid
-        if(!vali.checkDateValidate(hire_date)){
+        //Check hire_date
+        if(!business.checkDateValidate(hire_date)){
             response = {error:"hire_date must be a valid date equal to the current date or earlier."};
         }
-        else if(!vali.checkDayOfWeek(hire_date)){
+        else if(!business.checkDayOfWeek(hire_date)){
             response = {error:"hire_date must be a weekday."};
         }
-        else if(vali.checkIfCompany(company) && vali.checkIfDeptidExist(dept_id)){
+        else if(business.checkIfCompany(company) && business.checkIfDeptidExist(dept_id)){
             dl = new DataLayer(company);
             //var emp = new dl.Employee(emp_name,emp_no,hire_date,job,salary,dept_id,mng_id);
             var e = dl.insertEmployee(new dl.Employee(emp_name,emp_no,hire_date,job,salary,dept_id,mng_id));
@@ -266,32 +278,33 @@ app.post('/CompanyServices/employee', function(req, res, next) {
     }  
     res.send(JSON.stringify(response));
 });
-/* PUT employee */
+
+//PUT employee
 app.put('/CompanyServices/employee', function(req, res, next) {
     try{
         var company = req.body.company;
         var emp_name = req.body.emp_name;
         var emp_id = parseInt(req.body.emp_id);
-        var emp_no = vali.checkIfEmpnoUniquePut(req.body.emp_no,emp_id);
+        var emp_no = business.checkIfEmpnoUniquePut(req.body.emp_no,emp_id);
         var hire_date = req.body.hire_date;
         var job = req.body.job;
         var salary = parseFloat(req.body.salary);
         var dept_id = parseInt(req.body.dept_id);
         var mng_id = parseInt(req.body.mng_id);
-        if(!vali.checkIfEmpidExist(mng_id)){
+        if(!buisness.checkIfEmpidExist(mng_id)){
             mng_id = 0;
         } 
-        if(!vali.checkIfEmpidExist(emp_id)){
+        if(!buisness.checkIfEmpidExist(emp_id)){
             response = {error:"There is no such emp_id."};
         } 
         //check if the hire_date valid
-        else if(!vali.checkDateValidate(hire_date)){
+        else if(!buisness.checkDateValidate(hire_date)){
             response = {error:"hire_date must be a valid date equal to the current date or earlier."};
         }
-        else if(!vali.checkDayOfWeek(hire_date)){
+        else if(!buisness.checkDayOfWeek(hire_date)){
             response = {error:"hire_date must be a weekday."};
         }
-        else if(vali.checkIfCompany(company) && vali.checkIfDeptidExist(dept_id)){
+        else if(buisness.checkIfCompany(company) && buisness.checkIfDeptidExist(dept_id)){
             dl = new DataLayer(company);
             var e = dl.getEmployee(emp_id);
             e.setEmpName(emp_name);
@@ -325,7 +338,8 @@ app.put('/CompanyServices/employee', function(req, res, next) {
     }  
     res.send(JSON.stringify(response));
 });
-/* DELETE employee */
+
+// DELETE employee
 app.delete('/CompanyServices/employee', function(req, res, next) {
     try {
         company = req.query.company;
@@ -343,13 +357,14 @@ app.delete('/CompanyServices/employee', function(req, res, next) {
     }  
     res.send(JSON.stringify(response));
 });
-/* GET timecards */
+
+// GET timecards
 app.get('/CompanyServices/timecards', function(req, res, next) {
     try{
         company = req.query.company;
         emp_id = req.query.emp_id;
         dl = new DataLayer(company);
-        if(!vali.checkIfEmpidExist(emp_id)){
+        if(!buisness.checkIfEmpidExist(emp_id)){
             var timecards = dl.getAllTimecard(emp_id);
             var t_list = [];
             for(let t of timecards ){    	  
@@ -371,13 +386,14 @@ app.get('/CompanyServices/timecards', function(req, res, next) {
     } 
     res.send(response);
 });
-/* GET timecard */
+
+// GET timecard
 app.get('/CompanyServices/timecard', function(req, res, next) {
     try{
         company = req.query.company;
         timecard_id = parseInt(req.query.timecard_id);
         dl = new DataLayer(company);
-        if(vali.checkIfTimeidExist(timecard_id)){
+        if(buisness.checkIfTimeidExist(timecard_id)){
             var t = dl.getTimecard(timecard_id); 
             response = {
                 timecard_id:t.getId(),
@@ -394,7 +410,8 @@ app.get('/CompanyServices/timecard', function(req, res, next) {
     } 
     res.send(JSON.stringify(response));
 });
-/* POST timecard */
+
+// POST timecard
 app.post('/CompanyServices/timecard', function(req, res, next) {
     try{
         var company = req.body.company;
@@ -402,31 +419,31 @@ app.post('/CompanyServices/timecard', function(req, res, next) {
         var end_time = req.body.end_time;
         var emp_id = parseInt(req.body.emp_id);
         //check if the start_time and end_time valid
-        if(!vali.checkDateValidate(start_time)){
+        if(!buisness.checkDateValidate(start_time)){
             response = {error:"Not valid start_time: must be a valid date equal to the current date or earlier."};
         }
-        else if(!vali.checkIfDayRange(start_time)){
+        else if(!buisness.checkIfDayRange(start_time)){
             response = {error:"Not valid start_time: not later than a week of today."};
         }
-        else if(!vali.checkDayOfWeek(start_time)){
+        else if(!buisness.checkDayOfWeek(start_time)){
             response = {error:"Not valid start_time: must be a weekday."};
         }
-        else if(!vali.checkIfTimeRange(start_time)){
+        else if(!buisness.checkIfTimeRange(start_time)){
             response = {error:"Not valid start_time: no earlier than 6:00 and cannot later than 17:00"};
         }
-        else if(!vali.checkIfTimeEnd(end_time)){
+        else if(!buisness.checkIfTimeEnd(end_time)){
             response = {error:"Not valid end_time: no earlier than 7:00 and cannot later than 18:00"};
         }
-        else if(!vali.checkIfTimeDiff(start_time,end_time)){
+        else if(!buisness.checkIfTimeDiff(start_time,end_time)){
             response = {error:"Not valid end_time: End time must be at least 1 hour greater than the start_time"};
         }
-        else if(!vali.checkIfDateDiff(start_time,end_time)){
+        else if(!buisness.checkIfDateDiff(start_time,end_time)){
             response = {error:"Not valid end_time: must be on the same day as the start date."};
         } 
-        else if(!vali.checkIfEmpTimeDiff(emp_id,start_time)){
+        else if(!buisness.checkIfEmpTimeDiff(emp_id,start_time)){
             response = {error:"Not valid start_time: must not be the same day as other timecard"};
         }
-        else if(vali.checkIfCompany(company) && vali.checkIfEmpidExist(emp_id)){
+        else if(buisness.checkIfCompany(company) && buisness.checkIfEmpidExist(emp_id)){
             dl = new DataLayer(company);
             var time = new dl.Timecard(start_time,end_time,emp_id);
             var t = dl.insertTimecard(time);
@@ -451,7 +468,8 @@ app.post('/CompanyServices/timecard', function(req, res, next) {
     }  
     res.send(JSON.stringify(response));
 });
-/* PUT timecard */
+
+// PUT timecard
 app.put('/CompanyServices/timecard', function(req, res, next) {
     try{
         var company = req.body.company;
@@ -459,35 +477,35 @@ app.put('/CompanyServices/timecard', function(req, res, next) {
         var start_time = req.body.start_time;
         var end_time = req.body.end_time;
         var emp_id = parseInt(req.body.emp_id);
-        if(!vali.checkIfTimeidExist(timecard_id)){
+        if(!buisness.checkIfTimeidExist(timecard_id)){
             response = {error:"Not such timecard_id."};
         }
         //check if the start_time and end_time valid
-        else if(!vali.checkDateValidate(start_time)){
+        else if(!buisness.checkDateValidate(start_time)){
             response = {error:"Not valid start_time: must be a valid date equal to the current date or earlier."};
         }
-        else if(!vali.checkIfDayRange(start_time)){
+        else if(!buisness.checkIfDayRange(start_time)){
             response = {error:"Not valid start_time: not later than a week of today."};
         }
-        else if(!vali.checkDayOfWeek(start_time)){
+        else if(!buisness.checkDayOfWeek(start_time)){
             response = {error:"Not valid start_time: must be a weekday."};
         }
-        else if(!vali.checkIfTimeRange(start_time)){
+        else if(!buisness.checkIfTimeRange(start_time)){
             response = {error:"Not valid start_time: no earlier than 6:00 and cannot later than 17:00"};
         }
-        else if(!vali.checkIfTimeEnd(end_time)){
+        else if(!buisness.checkIfTimeEnd(end_time)){
             response = {error:"Not valid end_time: no earlier than 7:00 and cannot later than 18:00"};
         }
-        else if(!vali.checkIfTimeDiff(start_time,end_time)){
+        else if(!buisness.checkIfTimeDiff(start_time,end_time)){
             response = {error:"Not valid end_time: End time must be at least 1 hour greater than the start_time"};
         }
-        else if(!vali.checkIfDateDiff(start_time,end_time)){
+        else if(!buisness.checkIfDateDiff(start_time,end_time)){
             response = {error:"Not valid end_time: must be on the same day as the start date."};
         } 
-        else if(!vali.checkIfEmpTimeDiffPut(emp_id,start_time,timecard_id)){
+        else if(!buisness.checkIfEmpTimeDiffPut(emp_id,start_time,timecard_id)){
             response = {error:"Not valid start_time: must not be the same day as other timecard"};
         }
-        else if(vali.checkIfCompany(company) && vali.checkIfEmpidExist(emp_id)){
+        else if(buisness.checkIfCompany(company) && buisness.checkIfEmpidExist(emp_id)){
             dl = new DataLayer(company);
             var time = dl.getTimecard(timecard_id);
             time.setEmpId(emp_id);
@@ -514,7 +532,8 @@ app.put('/CompanyServices/timecard', function(req, res, next) {
     }  
     res.send(JSON.stringify(response));
 });
-/* DELETE timecard */
+
+// DELETE timecard
 app.delete('/CompanyServices/timecard', function(req, res, next) {
     try {
         company = req.query.company;
@@ -538,4 +557,5 @@ var server = app.listen(8080,function(){
     var host = server.address().address;
     var port = server.address().port;
 });
+
 //module.exports = app;
