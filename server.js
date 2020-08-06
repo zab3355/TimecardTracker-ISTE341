@@ -3,10 +3,13 @@
     professor: Bryan French
     assignment: Project 3
     file: server.js
-    function: 
+    function: Functionality for REST calls and node config
 */
 
-//require statements - express, moment (for date validation), and business layer
+//require statements
+//express
+//moment (date validation) https://www.npmjs.com/package/moment
+//Link business layer with module exports
 var express = require("express");
 var dateVal = require("moment");
 var buisness = require("./businessLayer.js")
@@ -14,6 +17,8 @@ var app = express();
 
 app.use(express.json());
 var urlencodedParser = app.use(express.urlencoded({ extended: false }));
+
+const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
 //DataLayer to require companydata/index.js and create RIT user
 var DataLayer = require("./companydata/index.js");
@@ -27,16 +32,17 @@ app.delete('/CompanyServices/company', function(req, res, next) {
         dl = new DataLayer(company);
         var row = dl.deleteCompany(company);
         if (row <= 0){
-            response = {error:"There is no such company."};
+            response = {error:"Company not found."};
         } else {
-            response = {success:company+"'s information deleted."};
+            response = {success:company+"'s info deleted."};
         }
      } catch (e) {
-        response = {error:"Cannot delete."};
+        response = {error:"Error in deletion."};
      } finally {
      }  
     res.send(JSON.stringify(response));
 });
+
 // GET departments 
 app.get('/CompanyServices/departments', function(req, res, next) {
     try{
@@ -56,11 +62,12 @@ app.get('/CompanyServices/departments', function(req, res, next) {
         }
         response = d_list;
     } catch (e){
-        response = {error: "Cannot get departments."};
+        response = {error: "departments error."};
     } finally {
     } 
     res.send(JSON.stringify(response));
 });
+
 // GET department 
 app.get('/CompanyServices/department', function(req, res, next) {
     try{
@@ -77,14 +84,15 @@ app.get('/CompanyServices/department', function(req, res, next) {
                     location:d.getLocation()
             }
         } else {
-            response = {error: "No such dept_id."}
+            response = {error: "dept_id not found."}
         }
     } catch (e){
-        response = {error: "Cannot get department with dept_id: "+dept_id+"."};
+        response = {error: "department dept_id error: "+dept_id+"."};
     } finally {
     } 
     res.send(JSON.stringify(response));
 });
+
 // POST department 
 app.post('/CompanyServices/department', function(req, res, next) {
     try{
@@ -108,7 +116,7 @@ app.post('/CompanyServices/department', function(req, res, next) {
                 }
             };
         } else {
-            response = {error:"Department is not inserted."};
+            response = {error:"Department not inserted."};
         }
         
     } catch (e){
@@ -117,6 +125,7 @@ app.post('/CompanyServices/department', function(req, res, next) {
     }  
     res.send(JSON.stringify(response));
 });
+
 // PUT department 
 app.put('/CompanyServices/department', function(req, res, next) {
     try{
@@ -145,7 +154,7 @@ app.put('/CompanyServices/department', function(req, res, next) {
                 }
             };
         } else {
-            response = {error: "There is no such dept_id."}
+            response = {error: "dept_id not found."}
         }
     } catch (e){
         response = {error:"Cannot update department."};
@@ -153,6 +162,7 @@ app.put('/CompanyServices/department', function(req, res, next) {
     }  
     res.send(JSON.stringify(response));
 });
+
 // DELETE department 
 app.delete('/CompanyServices/department', function(req, res, next) {
     try {
@@ -163,10 +173,10 @@ app.delete('/CompanyServices/department', function(req, res, next) {
         if (row <= 0){
             response = {error:"Error with Database."};
         } else {
-            response = {success:"Department "+dept_id+" from "+company+" is deleted"};
+            response = {success:"Department "+dept_id+" from "+company+" is deleted."};
         }
      } catch (e) {
-        response = {error:"Cannot delete."};
+        response = {error:"Error in deletion."};
      } finally {
      }  
     res.send(JSON.stringify(response));
@@ -194,7 +204,7 @@ app.get('/CompanyServices/employees', function(req, res, next) {
         }
         response = e_list;
     } catch (e){
-        response = {error: "Cannot get employees."};
+        response = {error: "employees not found."};
     } finally {
     } 
     res.send(response);
@@ -219,16 +229,16 @@ app.get('/CompanyServices/employee', function(req, res, next) {
                 mng_id:e.getMngId()
             };
         } else {
-            response = {error:"No such emp_id."}
+            response = {error:"emp_id not found."}
         }
     } catch (e){
-        response = {error: "Cannot get employee with emp_id: "+emp_id+"."};
+        response = {error: "emp_id error with: "+emp_id+"."};
     } finally {
     } 
     res.send(JSON.stringify(response));
 });
 
-/* POST employee */
+//POST employee
 app.post('/CompanyServices/employee', function(req, res, next) {
     try{
         var company = req.body.company;
@@ -242,6 +252,7 @@ app.post('/CompanyServices/employee', function(req, res, next) {
         if(!business.checkIfEmpidExist(mng_id)){
             mng_id = 0;
         }
+        
         //Check hire_date
         if(!business.checkDateValidate(hire_date)){
             response = {error:"hire_date must be a valid date equal to the current date or earlier."};
@@ -251,7 +262,7 @@ app.post('/CompanyServices/employee', function(req, res, next) {
         }
         else if(business.checkIfCompany(company) && business.checkIfDeptidExist(dept_id)){
             dl = new DataLayer(company);
-            //var emp = new dl.Employee(emp_name,emp_no,hire_date,job,salary,dept_id,mng_id);
+
             var e = dl.insertEmployee(new dl.Employee(emp_name,emp_no,hire_date,job,salary,dept_id,mng_id));
             response = 
             {
@@ -267,9 +278,8 @@ app.post('/CompanyServices/employee', function(req, res, next) {
                     mng_id:e.getMngId()
                 }
             };
-        
         } else {
-            response = {error:"DeptId is not exist."};
+            response = {error:"deptId not found."};
         }
         
     } catch (e){
@@ -295,9 +305,9 @@ app.put('/CompanyServices/employee', function(req, res, next) {
             mng_id = 0;
         } 
         if(!buisness.checkIfEmpidExist(emp_id)){
-            response = {error:"There is no such emp_id."};
+            response = {error:"emp_id not found."};
         } 
-        //check if the hire_date valid
+        //Check hire_date 
         else if(!buisness.checkDateValidate(hire_date)){
             response = {error:"hire_date must be a valid date equal to the current date or earlier."};
         }
@@ -330,7 +340,7 @@ app.put('/CompanyServices/employee', function(req, res, next) {
                 }
             };
         } else {
-            response = {error: "There is no such dept_id."}
+            response = {error: "dept_id not found."}
         }
     } catch (e){
         response = {error:"Cannot update employee."};
@@ -347,7 +357,7 @@ app.delete('/CompanyServices/employee', function(req, res, next) {
         dl = new DataLayer(company);
         var row = dl.deleteEmployee(emp_id);
         if (row <= 0){
-            response = {error:"There is no such emp_id."};
+            response = {error:"emp_id not found."};
         } else {
             response = {success:"Employee "+emp_id+" is deleted."};
         }
@@ -378,7 +388,7 @@ app.get('/CompanyServices/timecards', function(req, res, next) {
             }
             response = t_list;
         } else {
-            response = {error: "There is no such emp_id."};
+            response = {error: "emp_id not found."};
         }
     } catch (e){
         response = {error: "Cannot get timecards."};
@@ -402,7 +412,7 @@ app.get('/CompanyServices/timecard', function(req, res, next) {
                 emp_id:t.getEmpId()
             };
         } else {
-            response = {error:"No such timecard_id."}
+            response = {error:"timecard_id not found."}
         }
     } catch (e){
         response = {error: "Cannot get timecard with timecard_id: "+timecard_id+"."};
@@ -418,30 +428,31 @@ app.post('/CompanyServices/timecard', function(req, res, next) {
         var start_time = req.body.start_time;
         var end_time = req.body.end_time;
         var emp_id = parseInt(req.body.emp_id);
-        //check if the start_time and end_time valid
+        
+        //Error check start_time and end_time
         if(!buisness.checkDateValidate(start_time)){
             response = {error:"Not valid start_time: must be a valid date equal to the current date or earlier."};
         }
         else if(!buisness.checkIfDayRange(start_time)){
-            response = {error:"Not valid start_time: not later than a week of today."};
+            response = {error:"Not valid start_time: value must be later than a week of starting day."};
         }
         else if(!buisness.checkDayOfWeek(start_time)){
-            response = {error:"Not valid start_time: must be a weekday."};
+            response = {error:"Not valid start_time: value has to be a weekday."};
         }
         else if(!buisness.checkIfTimeRange(start_time)){
-            response = {error:"Not valid start_time: no earlier than 6:00 and cannot later than 17:00"};
+            response = {error:"Not valid start_time: cannot be earlier than 6:00 and cannot later than 17:00"};
         }
         else if(!buisness.checkIfTimeEnd(end_time)){
-            response = {error:"Not valid end_time: no earlier than 7:00 and cannot later than 18:00"};
+            response = {error:"Not valid end_time: cannot be earlier than 7:00 and cannot later than 18:00"};
         }
         else if(!buisness.checkIfTimeDiff(start_time,end_time)){
             response = {error:"Not valid end_time: End time must be at least 1 hour greater than the start_time"};
         }
         else if(!buisness.checkIfDateDiff(start_time,end_time)){
-            response = {error:"Not valid end_time: must be on the same day as the start date."};
+            response = {error:"Not valid end_time: has to be on the same day as the start date."};
         } 
         else if(!buisness.checkIfEmpTimeDiff(emp_id,start_time)){
-            response = {error:"Not valid start_time: must not be the same day as other timecard"};
+            response = {error:"Not valid start_time: cannot the same day as other timecard"};
         }
         else if(buisness.checkIfCompany(company) && buisness.checkIfEmpidExist(emp_id)){
             dl = new DataLayer(company);
@@ -459,7 +470,7 @@ app.post('/CompanyServices/timecard', function(req, res, next) {
             };
         
         } else {
-            response = {error:"This emp_id does not exist."};
+            response = {error:"emp_id not found."};
         }
         
     } catch (e){
@@ -478,23 +489,23 @@ app.put('/CompanyServices/timecard', function(req, res, next) {
         var end_time = req.body.end_time;
         var emp_id = parseInt(req.body.emp_id);
         if(!buisness.checkIfTimeidExist(timecard_id)){
-            response = {error:"Not such timecard_id."};
+            response = {error:"timecard_id not found."};
         }
-        //check if the start_time and end_time valid
+        //Error checking for start_time and end_time
         else if(!buisness.checkDateValidate(start_time)){
             response = {error:"Not valid start_time: must be a valid date equal to the current date or earlier."};
         }
         else if(!buisness.checkIfDayRange(start_time)){
-            response = {error:"Not valid start_time: not later than a week of today."};
+            response = {error:"Not valid start_time: value must be later than a week of starting day."};
         }
         else if(!buisness.checkDayOfWeek(start_time)){
-            response = {error:"Not valid start_time: must be a weekday."};
+            response = {error:"Not valid start_time: value has to be a weekday."};
         }
         else if(!buisness.checkIfTimeRange(start_time)){
-            response = {error:"Not valid start_time: no earlier than 6:00 and cannot later than 17:00"};
+            response = {error:"Not valid start_time: cannot be earlier than 6:00 and cannot later than 17:00"};
         }
         else if(!buisness.checkIfTimeEnd(end_time)){
-            response = {error:"Not valid end_time: no earlier than 7:00 and cannot later than 18:00"};
+            response = {error:"Not valid end_time: cannot be earlier than 7:00 and cannot later than 18:00"};
         }
         else if(!buisness.checkIfTimeDiff(start_time,end_time)){
             response = {error:"Not valid end_time: End time must be at least 1 hour greater than the start_time"};
@@ -503,7 +514,7 @@ app.put('/CompanyServices/timecard', function(req, res, next) {
             response = {error:"Not valid end_time: must be on the same day as the start date."};
         } 
         else if(!buisness.checkIfEmpTimeDiffPut(emp_id,start_time,timecard_id)){
-            response = {error:"Not valid start_time: must not be the same day as other timecard"};
+            response = {error:"Not valid start_time: cannot be the same day as other timecard"};
         }
         else if(buisness.checkIfCompany(company) && buisness.checkIfEmpidExist(emp_id)){
             dl = new DataLayer(company);
@@ -524,7 +535,7 @@ app.put('/CompanyServices/timecard', function(req, res, next) {
             };
         
         } else {
-            response = {error:"This emp_id does not exist."};
+            response = {error:"emp_id not found."};
         }
     } catch (e){
         response = {error:"Cannot update this timecard."};
@@ -541,21 +552,24 @@ app.delete('/CompanyServices/timecard', function(req, res, next) {
         dl = new DataLayer(company);
         var row = dl.deleteTimecard(timecard_id);
         if (row <= 0){
-            response = {error:"There is no such timecard_id."};
+            response = {error:"timecard_id not found."};
         } else {
             response = {success:"Timecard "+timecard_id+" is deleted."};
         }
     } catch (e) {
-        response = {error:"Cannot delete."};
+        response = {error:"Error in deletion."};
     } finally {
     }  
     res.send(JSON.stringify(response));
 });
 
-
-var server = app.listen(8080,function(){
+//listen to port 3000
+var server = app.listen(3000,function(){
     var host = server.address().address;
     var port = server.address().port;
 });
 
-//module.exports = app;
+//Show connection
+console.log(`Listening on 127.0.0.1: ${port}`);
+
+//module exports in business layer

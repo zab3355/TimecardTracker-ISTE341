@@ -3,11 +3,13 @@
     professor: Bryan French
     assignment: Project 3
     file: businessLayer.js
-    function: 
+    function: Contain module exports
 */
 
+//require statements -
+// moment(date validation) https://www.npmjs.com/package/moment
+//dataLayer links to companydata/index.js
 var moment = require("moment");
-
 var DataLayer = require("./companydata/index.js");
 
 //company as RIT username
