@@ -12,7 +12,7 @@
 //Link business layer with module exports
 var express = require("express");
 var dateVal = require("moment");
-var buisness = require("./businessLayer.js")
+var business = require("./businessLayer.js")
 var app = express();
 
 app.use(express.json());
@@ -301,20 +301,20 @@ app.put('/CompanyServices/employee', function(req, res, next) {
         var salary = parseFloat(req.body.salary);
         var dept_id = parseInt(req.body.dept_id);
         var mng_id = parseInt(req.body.mng_id);
-        if(!buisness.checkIfEmpidExist(mng_id)){
+        if(!business.checkIfEmpidExist(mng_id)){
             mng_id = 0;
         } 
-        if(!buisness.checkIfEmpidExist(emp_id)){
+        if(!business.checkIfEmpidExist(emp_id)){
             response = {error:"emp_id not found."};
         } 
         //Check hire_date 
-        else if(!buisness.checkDateValidate(hire_date)){
+        else if(!business.checkDateValidate(hire_date)){
             response = {error:"hire_date must be a valid date equal to the current date or earlier."};
         }
-        else if(!buisness.checkDayOfWeek(hire_date)){
+        else if(!business.checkDayOfWeek(hire_date)){
             response = {error:"hire_date must be a weekday."};
         }
-        else if(buisness.checkIfCompany(company) && buisness.checkIfDeptidExist(dept_id)){
+        else if(business.checkIfCompany(company) && business.checkIfDeptidExist(dept_id)){
             dl = new DataLayer(company);
             var e = dl.getEmployee(emp_id);
             e.setEmpName(emp_name);
@@ -374,7 +374,7 @@ app.get('/CompanyServices/timecards', function(req, res, next) {
         company = req.query.company;
         emp_id = req.query.emp_id;
         dl = new DataLayer(company);
-        if(!buisness.checkIfEmpidExist(emp_id)){
+        if(!business.checkIfEmpidExist(emp_id)){
             var timecards = dl.getAllTimecard(emp_id);
             var t_list = [];
             for(let t of timecards ){    	  
@@ -403,7 +403,7 @@ app.get('/CompanyServices/timecard', function(req, res, next) {
         company = req.query.company;
         timecard_id = parseInt(req.query.timecard_id);
         dl = new DataLayer(company);
-        if(buisness.checkIfTimeidExist(timecard_id)){
+        if(business.checkIfTimeidExist(timecard_id)){
             var t = dl.getTimecard(timecard_id); 
             response = {
                 timecard_id:t.getId(),
@@ -430,31 +430,31 @@ app.post('/CompanyServices/timecard', function(req, res, next) {
         var emp_id = parseInt(req.body.emp_id);
         
         //Error check start_time and end_time
-        if(!buisness.checkDateValidate(start_time)){
+        if(!business.checkDateValidate(start_time)){
             response = {error:"Not valid start_time: must be a valid date equal to the current date or earlier."};
         }
-        else if(!buisness.checkIfDayRange(start_time)){
+        else if(!business.checkIfDayRange(start_time)){
             response = {error:"Not valid start_time: value must be later than a week of starting day."};
         }
-        else if(!buisness.checkDayOfWeek(start_time)){
+        else if(!business.checkDayOfWeek(start_time)){
             response = {error:"Not valid start_time: value has to be a weekday."};
         }
-        else if(!buisness.checkIfTimeRange(start_time)){
+        else if(!business.checkIfTimeRange(start_time)){
             response = {error:"Not valid start_time: cannot be earlier than 6:00 and cannot later than 17:00"};
         }
-        else if(!buisness.checkIfTimeEnd(end_time)){
+        else if(!business.checkIfTimeEnd(end_time)){
             response = {error:"Not valid end_time: cannot be earlier than 7:00 and cannot later than 18:00"};
         }
-        else if(!buisness.checkIfTimeDiff(start_time,end_time)){
+        else if(!business.checkIfTimeDiff(start_time,end_time)){
             response = {error:"Not valid end_time: End time must be at least 1 hour greater than the start_time"};
         }
-        else if(!buisness.checkIfDateDiff(start_time,end_time)){
+        else if(!business.checkIfDateDiff(start_time,end_time)){
             response = {error:"Not valid end_time: has to be on the same day as the start date."};
         } 
-        else if(!buisness.checkIfEmpTimeDiff(emp_id,start_time)){
+        else if(!business.checkIfEmpTimeDiff(emp_id,start_time)){
             response = {error:"Not valid start_time: cannot the same day as other timecard"};
         }
-        else if(buisness.checkIfCompany(company) && buisness.checkIfEmpidExist(emp_id)){
+        else if(business.checkIfCompany(company) && business.checkIfEmpidExist(emp_id)){
             dl = new DataLayer(company);
             var time = new dl.Timecard(start_time,end_time,emp_id);
             var t = dl.insertTimecard(time);
@@ -488,35 +488,35 @@ app.put('/CompanyServices/timecard', function(req, res, next) {
         var start_time = req.body.start_time;
         var end_time = req.body.end_time;
         var emp_id = parseInt(req.body.emp_id);
-        if(!buisness.checkIfTimeidExist(timecard_id)){
+        if(!business.checkIfTimeidExist(timecard_id)){
             response = {error:"timecard_id not found."};
         }
         //Error checking for start_time and end_time
-        else if(!buisness.checkDateValidate(start_time)){
+        else if(!business.checkDateValidate(start_time)){
             response = {error:"Not valid start_time: must be a valid date equal to the current date or earlier."};
         }
-        else if(!buisness.checkIfDayRange(start_time)){
+        else if(!business.checkIfDayRange(start_time)){
             response = {error:"Not valid start_time: value must be later than a week of starting day."};
         }
-        else if(!buisness.checkDayOfWeek(start_time)){
+        else if(!business.checkDayOfWeek(start_time)){
             response = {error:"Not valid start_time: value has to be a weekday."};
         }
-        else if(!buisness.checkIfTimeRange(start_time)){
+        else if(!business.checkIfTimeRange(start_time)){
             response = {error:"Not valid start_time: cannot be earlier than 6:00 and cannot later than 17:00"};
         }
-        else if(!buisness.checkIfTimeEnd(end_time)){
+        else if(!business.checkIfTimeEnd(end_time)){
             response = {error:"Not valid end_time: cannot be earlier than 7:00 and cannot later than 18:00"};
         }
-        else if(!buisness.checkIfTimeDiff(start_time,end_time)){
+        else if(!business.checkIfTimeDiff(start_time,end_time)){
             response = {error:"Not valid end_time: End time must be at least 1 hour greater than the start_time"};
         }
-        else if(!buisness.checkIfDateDiff(start_time,end_time)){
+        else if(!business.checkIfDateDiff(start_time,end_time)){
             response = {error:"Not valid end_time: must be on the same day as the start date."};
         } 
-        else if(!buisness.checkIfEmpTimeDiffPut(emp_id,start_time,timecard_id)){
+        else if(!business.checkIfEmpTimeDiffPut(emp_id,start_time,timecard_id)){
             response = {error:"Not valid start_time: cannot be the same day as other timecard"};
         }
-        else if(buisness.checkIfCompany(company) && buisness.checkIfEmpidExist(emp_id)){
+        else if(business.checkIfCompany(company) && business.checkIfEmpidExist(emp_id)){
             dl = new DataLayer(company);
             var time = dl.getTimecard(timecard_id);
             time.setEmpId(emp_id);
